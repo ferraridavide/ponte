@@ -4,12 +4,59 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ponte di Bressana - Direzione</title>
+    
+    <meta name="description" content="Stato in tempo reale della viabilità sul Ponte di Bressana (Provincia di Pavia): senso unico alternato, direzione attiva, orari di chiusura e apertura." />
+    <meta name="keywords" content="ponte bressana, ponte po bressana, traffico ponte bressana, senso alternato ponte, lavori ponte bressana, viabilità pavia bressana" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://ponte.davide.im/" />
+    <meta name="author" content="Aggiornamento automatico" />
+    <meta name="generator" content="Static Real-Time Bridge Status" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="application-name" content="Ponte di Bressana" />
+    <meta name="apple-mobile-web-app-title" content="Ponte Bressana" />
+
+    
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ponte di Bressana" />
+    <meta property="og:title" content="Ponte di Bressana - Stato Viabilità in Tempo Reale" />
+    <meta property="og:description" content="Controlla ora la direzione aperta, senso alternato e orari di chiusura del Ponte di Bressana. Aggiornamento automatico ogni pochi secondi." />
+    <meta property="og:url" content="https://ponte.davide.im/" />
+    <meta property="og:image" content="https://ponte.davide.im/ponte.jpg" /> 
+    <meta property="og:image:alt" content="Vista del Ponte di Bressana sul Po" />
+
+    
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ponte di Bressana - Viabilità Live" />
+    <meta name="twitter:description" content="Direzione attiva, chiusure e senso alternato del Ponte di Bressana. Dati aggiornati automaticamente." />
+    <meta name="twitter:image" content="https://ponte.davide.im/ponte.jpg" />
+
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Bridge",
+      "name": "Ponte di Bressana",
+      "description": "Monitoraggio in tempo reale della viabilità sul Ponte di Bressana: direzione consentita, senso alternato, orari di chiusura lavori.",
+      "areaServed": "Bressana Bottarone, Pavia, Italia",
+      "url": "https://ponte.davide.im/",
+      "maintainer": {
+        "@type": "Organization",
+        "name": "Comune di Verrua Po"
+      }
+    }
+    </script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap"
       rel="stylesheet"
     />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <style>
       html,
       body {
@@ -35,16 +82,16 @@
         transition: background-color 0.5s ease;
       }
 
-      .verso-pavia {
+      body.verso-pavia {
         background-color: #0077b6;
       }
-      .verso-bressana {
+      body.verso-bressana {
         background-color: #0096c7;
       }
-      .alternato {
+      body.alternato {
         background-color: #fca311;
       }
-      .chiuso {
+      body.chiuso {
         background-color: #e63946;
       }
 
@@ -109,7 +156,6 @@
     <script>
       const directionTextElement = document.getElementById("direction-text");
       const untilTextElement = document.getElementById("until-text");
-      const containerElement = document.getElementById("container");
       const clockElement = document.getElementById("clock");
 
       const schedules = {
@@ -310,7 +356,7 @@
         const status = getCurrentStatus(now);
         directionTextElement.textContent = status.direction;
         untilTextElement.textContent = status.until;
-        containerElement.className = `container ${status.styleClass}`;
+        document.body.className = status.styleClass;
       }
 
       document.addEventListener("DOMContentLoaded", () => {
