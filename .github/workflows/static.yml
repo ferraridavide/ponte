@@ -31,6 +31,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Minify index.html
+        run: |
+          npx html-minifier-terser@latest index.html -o index.html \
+            --collapse-whitespace \
+            --remove-comments \
+            --remove-optional-tags \
+            --remove-redundant-attributes \
+            --minify-css true \
+            --minify-js true;
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
