@@ -16,6 +16,9 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="application-name" content="Ponte di Bressana" />
     <meta name="apple-mobile-web-app-title" content="Ponte Bressana" />
+  <meta name="theme-color" content="#0077b6" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/assets/ponte.jpg" />
 
     
     <meta property="og:locale" content="it_IT" />
@@ -24,14 +27,14 @@
     <meta property="og:title" content="Ponte di Bressana - Stato Viabilità in Tempo Reale" />
     <meta property="og:description" content="Controlla ora la direzione aperta, senso alternato e orari di chiusura del Ponte di Bressana. Aggiornamento automatico ogni pochi secondi." />
     <meta property="og:url" content="https://ponte.davide.im/" />
-    <meta property="og:image" content="https://ponte.davide.im/ponte.jpg" /> 
+  <meta property="og:image" content="https://ponte.davide.im/assets/ponte.jpg" /> 
     <meta property="og:image:alt" content="Vista del Ponte di Bressana sul Po" />
 
     
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Ponte di Bressana - Viabilità Live" />
     <meta name="twitter:description" content="Direzione attiva, chiusure e senso alternato del Ponte di Bressana. Dati aggiornati automaticamente." />
-    <meta name="twitter:image" content="https://ponte.davide.im/ponte.jpg" />
+  <meta name="twitter:image" content="https://ponte.davide.im/assets/ponte.jpg" />
 
     
     <script type="application/ld+json">
@@ -362,6 +365,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         updateDirection();
         setInterval(updateDirection, 10000);
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/service-worker.js').catch(console.error);
+        }
       });
     </script>
   </body>
