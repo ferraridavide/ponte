@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ponte di Bressana - Direzione</title>
+    <title>Ponte di Bressana - Viabilità</title>
 
     <meta
       name="description"
@@ -98,7 +98,89 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      /* Custom styles for the picker from slider.html */
+      .picker-container {
+        touch-action: none; /* Prevents scrolling on touch devices */
+        cursor: grab;
+      }
+
+      .picker-container:active {
+        cursor: grabbing;
+      }
+
+      /* The main tick line */
+      .tick-ruler {
+        position: relative;
+        height: 50px; /* Height for the ticks area */
+        transition: transform 0.2s ease-out; /* Smooth snapping animation */
+      }
+
+      /* Individual tick mark styling */
+      .tick {
+        position: absolute;
+        background-color: #cbd5e1; /* slate-300 */
+        transform: translateX(-50%); /* Center the tick on its position */
+      }
+
+      /* Taller tick for every 5th mark */
+      .tick-large {
+        width: 2px;
+        height: 30px;
+        top: 0;
+      }
+
+      /* Standard tick mark */
+      .tick-small {
+        width: 1px;
+        height: 15px;
+        top: 0;
+      }
+
+      /* Tiny tick for 15-min intervals */
+      .tick-tiny {
+        width: 1px;
+        height: 8px;
+        top: 0;
+        background-color: #e2e8f0; /* slate-200 */
+      }
+
+      /* Label for the tick mark */
+      .tick-label {
+        position: absolute;
+        top: 35px; /* Position below the large tick */
+        transform: translateX(-50%);
+        color: #475569; /* slate-600 */
+        font-size: 12px;
+      }
+
+      /* The central selection pointer */
+      .picker-pointer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        width: 3px;
+        height: 60px; /* Taller than the ticks */
+        background-color: #0ea5e9; /* sky-500 */
+        border-radius: 9999px;
+        z-index: 10;
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+      }
+
+      /* Prevent text selection during drag */
+      .non-selectable {
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10+ and Edge */
+        user-select: none; /* Standard syntax */
+      }
+
+      /* Original styles from index.html */
       html,
       body {
         margin: 0;
@@ -107,6 +189,7 @@
         height: 100%;
         overflow: hidden;
         font-family: "Inter", sans-serif;
+        transition: background-color 0.5s ease;
       }
 
       .container {
@@ -114,13 +197,13 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
         text-align: center;
         padding: 20px;
         box-sizing: border-box;
         color: white;
-        transition: background-color 0.5s ease;
+        
       }
 
       body.verso-pavia {
@@ -136,11 +219,17 @@
         background-color: #e63946;
       }
 
+      #title {
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      }
+
       #direction-text {
         font-size: clamp(2.5rem, 15vw, 8rem);
         font-weight: 900;
         text-transform: uppercase;
-        letter-spacing: 2px;
+        line-height: normal;
         text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         margin: 0;
       }
@@ -149,14 +238,11 @@
         font-size: clamp(1rem, 4vw, 2rem);
         font-weight: 500;
         opacity: 0.9;
-        position: absolute;
-        bottom: 9vh;
+        bottom: 30vh; /* Adjusted to make space for the slider */
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
       }
 
       #official-link {
-        position: absolute;
-        bottom: 4vh;
         font-size: clamp(0.8rem, 2.5vw, 1.1rem);
         font-weight: normal;
         color: rgba(255, 255, 255, 0.85);
@@ -169,22 +255,58 @@
       }
 
       #clock {
-        position: absolute;
-        top: 3vh;
         font-size: clamp(0.9rem, 3vw, 1.5rem);
-        font-weight: 500;
-        opacity: 0.8;
-        background-color: rgba(0, 0, 0, 0.1);
-        padding: 8px 16px;
-        border-radius: 12px;
+        font-weight: bold;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Slider positioning */
+      #slider-container {
+        width: 100vw;
+        max-width: 500px;
+        padding: 0 20px;
+        box-sizing: border-box;
       }
     </style>
   </head>
   <body>
     <div id="container" class="container">
-      <div id="clock"></div>
-      <h1 id="direction-text">Caricamento...</h1>
-      <p id="until-text"></p>
+      <h1 id="title">Ponte di Bressana - Viabilità</h1>
+      <div>
+        <h1 id="direction-text">Caricamento...</h1>
+        <p id="until-text"></p>
+      </div>
+
+      <div>
+      <!-- Slider Component -->
+      <div id="slider-container" class="non-selectable">
+        <div
+          class="relative w-full h-[60px] flex items-center"
+          style="
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0 10px;
+          "
+        >
+          <div
+            id="picker"
+            class="picker-container w-full h-full overflow-hidden relative rounded-lg"
+          >
+            <div id="tickRuler" class="tick-ruler">
+              <!-- Ticks will be generated by JavaScript here -->
+            </div>
+          </div>
+          <!-- Central Pointer -->
+          <div class="picker-pointer"></div>
+        </div>
+        <div
+          class="text-center mt-3"
+          style="text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1)"
+        >
+        <div id="clock"></div>
+        </div>
+      </div>
+
       <a
         id="official-link"
         href="https://www.comune.verruapo.pv.it/it-it/avvisi/2025/viabilita-e-trasporti/chiusura-ponte-po-bressana-inizio-lavori-nuovi-orari-di-circolazione-359314-1-088271a9de5ce8cc2bb5d5392a3c3a73"
@@ -193,216 +315,403 @@
         >Consulta la pagina ufficiale</a
       >
     </div>
+    </div>
 
     <script>
-      const directionTextElement = document.getElementById("direction-text");
-      const untilTextElement = document.getElementById("until-text");
-      const clockElement = document.getElementById("clock");
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- DOM Elements ---
+        const directionTextElement = document.getElementById("direction-text");
+        const untilTextElement = document.getElementById("until-text");
+        const clockElement = document.getElementById("clock");
+        const picker = document.getElementById("picker");
+        const tickRuler = document.getElementById("tickRuler");
 
-      const schedules = {
-        schedule1: {
-          endDate: new Date("2025-08-11T00:00:00"),
-          weekday: [
-            {
-              start: 23,
-              end: 5,
-              direction: "PONTE CHIUSO",
-              until: "fino alle 05:00",
-              class: "chiuso",
-              crossesMidnight: true,
-            },
-            {
-              start: 5,
-              end: 6,
-              direction: "SENSO ALTERNATO",
-              until: "fino alle 06:00",
-              class: "alternato",
-            },
-            {
-              start: 6,
-              end: 14,
-              direction: "APERTO DA BRESSANA VERSO PAVIA",
-              until: "fino alle 14:00",
-              class: "verso-pavia",
-            },
-            {
-              start: 14,
-              end: 21,
-              direction: "APERTO DA PAVIA VERSO BRESSANA",
-              until: "fino alle 21:00",
-              class: "verso-bressana",
-            },
-            {
-              start: 21,
-              end: 23,
-              direction: "SENSO ALTERNATO",
-              until: "fino alle 23:00",
-              class: "alternato",
-            },
-          ],
-          weekend: [
-            {
-              start: 23,
-              end: 5,
-              direction: "PONTE CHIUSO",
-              until: "fino alle 05:00",
-              class: "chiuso",
-              crossesMidnight: true,
-            },
-            {
-              start: 5,
-              end: 6,
-              direction: "SENSO ALTERNATO",
-              until: "fino alle 06:00",
-              class: "alternato",
-            },
-            {
-              start: 6,
-              end: 14,
-              direction: "APERTO DA PAVIA VERSO BRESSANA",
-              until: "fino alle 14:00",
-              class: "verso-bressana",
-            },
-            {
-              start: 14,
-              end: 21,
-              direction: "APERTO DA BRESSANA VERSO PAVIA",
-              until: "fino alle 21:00",
-              class: "verso-pavia",
-            },
-            {
-              start: 21,
-              end: 23,
-              direction: "SENSO ALTERNATO",
-              until: "fino alle 23:00",
-              class: "alternato",
-            },
-          ],
-        },
+        // --- Bridge Schedules ---
+        const schedules = {
+          schedule1: {
+            endDate: new Date("2025-08-11T00:00:00"),
+            weekday: [
+              {
+                start: 23,
+                end: 5,
+                direction: "PONTE CHIUSO",
+                until: "fino alle 05:00",
+                class: "chiuso",
+                crossesMidnight: true,
+              },
+              {
+                start: 5,
+                end: 6,
+                direction: "SENSO ALTERNATO",
+                until: "fino alle 06:00",
+                class: "alternato",
+              },
+              {
+                start: 6,
+                end: 14,
+                direction: "APERTO DA BRESSANA VERSO PAVIA",
+                until: "fino alle 14:00",
+                class: "verso-pavia",
+              },
+              {
+                start: 14,
+                end: 21,
+                direction: "APERTO DA PAVIA VERSO BRESSANA",
+                until: "fino alle 21:00",
+                class: "verso-bressana",
+              },
+              {
+                start: 21,
+                end: 23,
+                direction: "SENSO ALTERNATO",
+                until: "fino alle 23:00",
+                class: "alternato",
+              },
+            ],
+            weekend: [
+              {
+                start: 23,
+                end: 5,
+                direction: "PONTE CHIUSO",
+                until: "fino alle 05:00",
+                class: "chiuso",
+                crossesMidnight: true,
+              },
+              {
+                start: 5,
+                end: 6,
+                direction: "SENSO ALTERNATO",
+                until: "fino alle 06:00",
+                class: "alternato",
+              },
+              {
+                start: 6,
+                end: 14,
+                direction: "APERTO DA PAVIA VERSO BRESSANA",
+                until: "fino alle 14:00",
+                class: "verso-bressana",
+              },
+              {
+                start: 14,
+                end: 21,
+                direction: "APERTO DA BRESSANA VERSO PAVIA",
+                until: "fino alle 21:00",
+                class: "verso-pavia",
+              },
+              {
+                start: 21,
+                end: 23,
+                direction: "SENSO ALTERNATO",
+                until: "fino alle 23:00",
+                class: "alternato",
+              },
+            ],
+          },
+          schedule2: {
+            endDate: new Date("2026-07-01T00:00:00"),
+            weekday: [
+              {
+                start: 21,
+                end: 6,
+                direction: "SENSO ALTERNATO",
+                until: "fino alle 06:00",
+                class: "alternato",
+                crossesMidnight: true,
+              },
+              {
+                start: 6,
+                end: 14,
+                direction: "APERTO DA BRESSANA VERSO PAVIA",
+                until: "fino alle 14:00",
+                class: "verso-pavia",
+              },
+              {
+                start: 14,
+                end: 21,
+                direction: "APERTO DA PAVIA VERSO BRESSANA",
+                until: "fino alle 21:00",
+                class: "verso-bressana",
+              },
+            ],
+            weekend: [
+              {
+                start: 21,
+                end: 6,
+                direction: "SENSO ALTERNATO",
+                until: "fino alle 06:00",
+                class: "alternato",
+                crossesMidnight: true,
+              },
+              {
+                start: 6,
+                end: 14,
+                direction: "APERTO DA PAVIA VERSO BRESSANA",
+                until: "fino alle 14:00",
+                class: "verso-bressana",
+              },
+              {
+                start: 14,
+                end: 21,
+                direction: "APERTO DA BRESSANA VERSO PAVIA",
+                until: "fino alle 21:00",
+                class: "verso-pavia",
+              },
+            ],
+          },
+        };
 
-        schedule2: {
-          endDate: new Date("2026-07-01T00:00:00"),
-          weekday: [
-            {
-              start: 21,
-              end: 6,
-              direction: "SENSO ALTERNATO",
-              until: "fino alle 06:00",
-              class: "alternato",
-              crossesMidnight: true,
-            },
-            {
-              start: 6,
-              end: 14,
-              direction: "APERTO DA BRESSANA VERSO PAVIA",
-              until: "fino alle 14:00",
-              class: "verso-pavia",
-            },
-            {
-              start: 14,
-              end: 21,
-              direction: "APERTO DA PAVIA VERSO BRESSANA",
-              until: "fino alle 21:00",
-              class: "verso-bressana",
-            },
-          ],
-          weekend: [
-            {
-              start: 21,
-              end: 6,
-              direction: "SENSO ALTERNATO",
-              until: "fino alle 06:00",
-              class: "alternato",
-              crossesMidnight: true,
-            },
-            {
-              start: 6,
-              end: 14,
-              direction: "APERTO DA PAVIA VERSO BRESSANA",
-              until: "fino alle 14:00",
-              class: "verso-bressana",
-            },
-            {
-              start: 14,
-              end: 21,
-              direction: "APERTO DA BRESSANA VERSO PAVIA",
-              until: "fino alle 21:00",
-              class: "verso-pavia",
-            },
-          ],
-        },
-      };
+        // --- Slider Configuration ---
+        const sliderConfig = {
+          min: 0,
+          max: 24, // max value in hours
+          step: 0.25, // 15 minutes
+          tickInterval: 28, // pixels between each main tick (1 hour)
+          defaultValue: 0, // Start at "now"
+        };
 
-      function getCurrentStatus(now) {
-        const hour = now.getHours();
-        const day = now.getDay();
-        const isWeekend = day === 0 || day === 6;
+        // --- State Variables ---
+        let isDragging = false;
+        let startX = 0;
+        let startTranslate = 0;
+        let currentTranslate = 0;
+        let currentHourOffset = 0;
 
-        let activeScheduleData = null;
-        if (now < schedules.schedule1.endDate) {
-          activeScheduleData = schedules.schedule1;
-        } else if (now < schedules.schedule2.endDate) {
-          activeScheduleData = schedules.schedule2;
-        }
+        // --- Core Logic ---
+        function getCurrentStatus(now) {
+          const hour = now.getHours();
+          const day = now.getDay();
+          const isWeekend = day === 0 || day === 6;
 
-        if (!activeScheduleData) {
+          let activeScheduleData = null;
+          if (now < schedules.schedule1.endDate) {
+            activeScheduleData = schedules.schedule1;
+          } else if (now < schedules.schedule2.endDate) {
+            activeScheduleData = schedules.schedule2;
+          }
+
+          if (!activeScheduleData) {
+            return {
+              direction: "TRANSITO REGOLARE",
+              until: "",
+              styleClass: "verso-pavia",
+            };
+          }
+
+          const daySchedule = isWeekend
+            ? activeScheduleData.weekend
+            : activeScheduleData.weekday;
+
+          for (const slot of daySchedule) {
+            if (slot.crossesMidnight) {
+              if (hour >= slot.start || hour < slot.end) {
+                return {
+                  direction: slot.direction,
+                  until: slot.until,
+                  styleClass: slot.class,
+                };
+              }
+            } else {
+              if (hour >= slot.start && hour < slot.end) {
+                return {
+                  direction: slot.direction,
+                  until: slot.until,
+                  styleClass: slot.class,
+                };
+              }
+            }
+          }
           return {
-            direction: "TRANSITO REGOLARE",
+            direction: "ERRORE ORARIO",
             until: "",
-            styleClass: "verso-pavia",
+            styleClass: "chiuso",
           };
         }
 
-        const daySchedule = isWeekend
-          ? activeScheduleData.weekend
-          : activeScheduleData.weekday;
+        function updateUI(hourOffset = 0) {
+          const now = new Date();
+          const targetTime = new Date(
+            now.getTime() + hourOffset * 60 * 60 * 1000
+          );
 
-        for (const slot of daySchedule) {
-          if (slot.crossesMidnight) {
-            if (hour >= slot.start || hour < slot.end) {
-              return {
-                direction: slot.direction,
-                until: slot.until,
-                styleClass: slot.class,
-              };
-            }
+          // Update main display
+          const status = getCurrentStatus(targetTime);
+          directionTextElement.textContent = status.direction;
+          untilTextElement.textContent = status.until;
+          document.body.className = status.styleClass;
+
+          // Update clock to show current time or selected time
+          const formattedTime = targetTime.toLocaleTimeString("it-IT", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          const formattedDate = targetTime.toLocaleDateString("it-IT", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          });
+
+          if (hourOffset === 0) {
+            clockElement.textContent = `${formattedDate} - ${formattedTime}`;
           } else {
-            if (hour >= slot.start && hour < slot.end) {
-              return {
-                direction: slot.direction,
-                until: slot.until,
-                styleClass: slot.class,
-              };
+            const hours = Math.floor(hourOffset);
+            const minutes = Math.round((hourOffset % 1) * 60);
+            let futureString = `Tra ${hours}h`;
+            if (minutes > 0) {
+              futureString += ` e ${minutes}min`;
             }
+            clockElement.textContent = `${futureString} (${formattedDate} - ${formattedTime})`;
           }
         }
 
-        return { direction: "ERRORE ORARIO", until: "", styleClass: "chiuso" };
-      }
+        // --- Slider Functions ---
+        function initializePicker() {
+          tickRuler.innerHTML = "";
+          const ticksPerHour = 1 / sliderConfig.step;
+          const totalTicks =
+            (sliderConfig.max - sliderConfig.min) * ticksPerHour;
+          const pixelPerTick = sliderConfig.tickInterval / ticksPerHour;
 
-      function updateDirection() {
-        const now = new Date();
+          for (let i = 0; i <= totalTicks; i++) {
+            const value = sliderConfig.min + i * sliderConfig.step;
+            const position = i * pixelPerTick;
 
-        const formattedTime = now.toLocaleTimeString("it-IT", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        const formattedDate = now.toLocaleDateString("it-IT", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        });
-        clockElement.textContent = `${formattedDate} - ${formattedTime}`;
+            const tickWrapper = document.createElement("div");
+            tickWrapper.style.position = "absolute";
+            tickWrapper.style.left = `${position}px`;
 
-        const status = getCurrentStatus(now);
-        directionTextElement.textContent = status.direction;
-        untilTextElement.textContent = status.until;
-        document.body.className = status.styleClass;
-      }
+            const tick = document.createElement("div");
+            tick.className = "tick";
 
-      document.addEventListener("DOMContentLoaded", () => {
-        updateDirection();
-        setInterval(updateDirection, 10000);
+            if (i % ticksPerHour === 0) {
+              const isLabelTick = value % 2 === 0;
+              if (isLabelTick) {
+                tick.classList.add("tick-large");
+                const label = document.createElement("span");
+                label.className = "tick-label";
+                label.textContent = value === sliderConfig.min ? "Adesso" : value + "h";
+                label.style.color = "white";
+                tickWrapper.appendChild(label);
+              } else {
+                tick.classList.add("tick-small");
+              }
+            } else {
+              tick.classList.add("tick-tiny");
+            }
+            tickWrapper.appendChild(tick);
+            tickRuler.appendChild(tickWrapper);
+          }
+
+          const defaultOffset =
+            (sliderConfig.defaultValue - sliderConfig.min) *
+            sliderConfig.tickInterval;
+          const pickerCenter = picker.offsetWidth / 2;
+          currentTranslate = pickerCenter - defaultOffset;
+          snapToNearestTick();
+        }
+
+        function onDragStart(clientX) {
+          isDragging = true;
+          startX = clientX;
+          startTranslate = currentTranslate;
+          tickRuler.style.transition = "none";
+        }
+
+        function onDragMove(clientX) {
+          if (!isDragging) return;
+          const dx = clientX - startX;
+          currentTranslate = startTranslate + dx;
+
+          const pickerCenter = picker.offsetWidth / 2;
+          const pixelPerTick =
+            sliderConfig.tickInterval / (1 / sliderConfig.step);
+          const maxTranslate =
+            pickerCenter -
+            (sliderConfig.max - sliderConfig.min) *
+              (1 / sliderConfig.step) *
+              pixelPerTick;
+          const minTranslate = pickerCenter;
+
+          currentTranslate = Math.max(
+            maxTranslate,
+            Math.min(minTranslate, currentTranslate)
+          );
+          updateRulerPosition();
+
+          // --- Live update during drag ---
+          const offsetFromCenter = currentTranslate - pickerCenter;
+          const currentValue = -offsetFromCenter / sliderConfig.tickInterval;
+          const snappedValue = Math.round(currentValue);
+          const clampedValue = Math.max(
+            sliderConfig.min,
+            Math.min(sliderConfig.max, snappedValue)
+          );
+          updateSelectedValue(clampedValue, false); // Update UI without snapping
+        }
+
+        function onDragEnd() {
+          if (!isDragging) return;
+          isDragging = false;
+          tickRuler.style.transition = "transform 0.2s ease-out";
+          snapToNearestTick();
+        }
+
+        function snapToNearestTick() {
+          const pickerCenter = picker.offsetWidth / 2;
+          const offsetFromCenter = currentTranslate - pickerCenter;
+
+          // Calculate the current value (in hours) based on the pixel offset
+          const currentValue = -offsetFromCenter / sliderConfig.tickInterval;
+
+          // Round the value to the nearest whole hour
+          let snappedValue = Math.round(currentValue);
+
+          // Clamp the value within the min/max range
+          snappedValue = Math.max(
+            sliderConfig.min,
+            Math.min(sliderConfig.max, snappedValue)
+          );
+
+          // Calculate the final translation to center the snapped hour
+          const finalOffset = snappedValue * sliderConfig.tickInterval;
+          currentTranslate = pickerCenter - finalOffset;
+
+          updateRulerPosition();
+          updateSelectedValue(snappedValue);
+        }
+
+        function updateRulerPosition() {
+          tickRuler.style.transform = `translateX(${currentTranslate}px)`;
+        }
+
+        function updateSelectedValue(value) {
+          currentHourOffset = value;
+          updateUI(currentHourOffset);
+        }
+
+        // --- Event Listeners ---
+        picker.addEventListener("mousedown", (e) => onDragStart(e.clientX));
+        window.addEventListener("mousemove", (e) => onDragMove(e.clientX));
+        window.addEventListener("mouseup", onDragEnd);
+        window.addEventListener("mouseleave", onDragEnd);
+
+        picker.addEventListener("touchstart", (e) =>
+          onDragStart(e.touches[0].clientX)
+        );
+        window.addEventListener("touchmove", (e) =>
+          onDragMove(e.touches[0].clientX)
+        );
+        window.addEventListener("touchend", onDragEnd);
+
+        // --- Initialization ---
+        initializePicker();
+        updateUI(currentHourOffset); // Initial UI update
+
+        // Keep the time refreshing every 10 seconds
+        setInterval(() => {
+          updateUI(currentHourOffset);
+        }, 10000);
+
+        // Service Worker
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker
             .register("/service-worker.js")
